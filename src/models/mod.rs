@@ -1,3 +1,4 @@
 //src/models/mod.rs
 pub mod pizza;
-pub use BuyPizzaRequest;
+pub use pizza::BuyPizzaRequest;
+pub use pizza::UpdatePizzaURL;
