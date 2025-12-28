@@ -3,14 +3,15 @@
 use actix_web::{
     App, HttpResponse, HttpServer, Responder, get, patch, post, web::{Data, Json, Path}
 };
+use uuid::Uuid;
 use validator::Validate;
 
 mod models;
-use models::BuyPizzaRequest;
-use models::UpdatePizzaURL;
-
 mod db;
 use db::Database;
+use uuid;
+
+use crate::models::pizza::{BuyPizzaRequest, UpdatePizzaURL, Pizza};
 
 #[get("/pizzas")]
 async fn get_pizzas(db: Data<Database>) -> impl Responder {
@@ -22,7 +23,7 @@ async fn get_pizzas(db: Data<Database>) -> impl Responder {
 }
 
 #[post("/buypizza")]
-async fn buy_pizza(body: Json<BuyPizzaRequest>) -> impl Responder {
+async fn buy_pizza(body: Json<BuyPizzaRequest>, db:Data<Database> ) -> impl Responder {
     if let Err(validation_error) = body.validate() {
         let error_message = validation_error
             .field_errors()
@@ -35,10 +36,23 @@ async fn buy_pizza(body: Json<BuyPizzaRequest>) -> impl Responder {
         
         return HttpResponse::BadRequest()
             .body(format!("Validation error: {}", error_message));
-    }
+    } 
     
     let pizza_name = &body.pizza_name;
-    HttpResponse::Ok().body(format!("Pizza ordered: {}", pizza_name))
+    let mut buffer = Uuid::encode_buffer();
+    let new_uuid = Uuid::new_v4().simple().encode_lower(&mut buffer);
+    let new_pizza = db.add_pizza(Pizza::new(
+        String::from(new_uuid), 
+        pizza_name.to_string()
+    )).await;
+
+    match new_pizza{
+        Some(created) => {
+            HttpResponse::Ok().body(format!( "created new pizza: {:?}", created))
+        },
+        None =>HttpResponse::Ok().body("error buying pizza"),
+    }
+
 }
 
 #[patch("/updatepizza/{uuid}")]

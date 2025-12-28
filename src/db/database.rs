@@ -9,14 +9,14 @@ use crate::models::pizza::Pizza;
 pub struct Database {
     pub client: Surreal<Client>,
     //pub name_space: String,
-   // pub db_name: String,
+    //pub db_name: String,
 }
 
 impl Database {
     pub async fn init() -> Result<Self, Error> {
         let client = Surreal::new::<Ws>("127.0.0.1:8000").await?;
         client.signin(Root {
-            username : "radon",
+            username : "root",
             password : "Hassan@pizza123"
         })
         .await?;
@@ -47,3 +47,4 @@ pub async fn add_pizza(&self, new_pizza: Pizza) -> Option<Pizza> {
     }
 }
 }
+ 
