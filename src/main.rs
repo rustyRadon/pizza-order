@@ -10,19 +10,20 @@ mod models;
 mod db;
 
 use db::Database;
+use db::PizzaDataTrait;
 use crate::error::pizza_error::PizzaError;
 use crate::models::pizza::{BuyPizzaRequest, Pizza, UpdatePizzaURL};
 
 #[get("/pizzas")]
 async fn get_pizzas(db: Data<Database>) -> Result<Json<Vec<Pizza>>, PizzaError> {
-    let pizzas = db.get_all_pizzas().await;
+    let pizzas = Database::get_all_pizzas(&db).await;
     match pizzas {
         Some(found_pizzas) => Ok(Json(found_pizzas)),
         None => Err(PizzaError::NoPizzaFound),
     }
-}
+} 
 
-#[post("/buypizza")]
+#[post("/buypizza")] 
 async fn buy_pizza(
     body: Json<BuyPizzaRequest>,
     db: Data<Database>,
@@ -45,15 +46,14 @@ async fn buy_pizza(
     let mut buffer = Uuid::encode_buffer();
     let new_uuid = Uuid::new_v4().simple().encode_lower(&mut buffer);
 
-    let new_pizza = db
-        .add_pizza(Pizza::new(
+    let new_pizza = Database::add_pizza(&db, Pizza::new(
             String::from(new_uuid),
             pizza_name.to_string(),
         ))
         .await;
 
     match new_pizza {
-        Some(created) => HttpResponse::Ok().json(created),
+        Some(created) => HttpResponse::Ok().json(created), 
         None => HttpResponse::InternalServerError()
             .body("Pizza creation failed"),
     }
@@ -65,7 +65,7 @@ async fn update_pizza(
     db: Data<Database>,
 ) -> Result<Json<Pizza>, PizzaError> {
     let uuid = update_pizza_url.into_inner().uuid;
-    let update_result = db.update_pizza(uuid).await;
+    let update_result = Database::update_pizza(&db, uuid).await;
     match update_result {
         Some(updated_pizza) => Ok(Json(updated_pizza)),
         None => Err(PizzaError::NoSuchPizza),
