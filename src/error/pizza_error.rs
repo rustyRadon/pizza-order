@@ -1,4 +1,3 @@
-//ne enum pizza enum
 use actix_web::{
     http:: { header::ContentType, StatusCode},
     HttpResponse, ResponseError
