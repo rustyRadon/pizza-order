@@ -1,4 +1,3 @@
-//src/db/pizza_data_traits.rs
 use crate::db::Database;
 use crate::models::pizza::Pizza;
 use async_trait::async_trait;
@@ -34,7 +33,7 @@ impl PizzaDataTrait for Database {
     }
 
     async fn update_pizza(&self, uuid: String) -> Option<Pizza> {
-        // First check if pizza exists
+        /// check if pizza exists
         let find_pizza: Result<Option<Pizza>, Error> = 
             self.client.select(("pizza", &uuid)).await;
 
@@ -42,7 +41,7 @@ impl PizzaDataTrait for Database {
             Ok(found) => {
                 match found {
                     Some(_found_pizza) => {
-                        // Update the pizza
+                        /// Update the pizza
                         let updated_pizza: Result<Option<Pizza>, Error> = self
                             .client
                             .update(("pizza", &uuid))
