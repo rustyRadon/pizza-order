@@ -1,4 +1,4 @@
-//src/db/database.rs
+
 use surrealdb::engine::remote::ws::{Client, Ws};
 use surrealdb::opt::auth::Root;
 use surrealdb::{Error, Surreal};
